@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id      Int      @id @default(autoincrement())
+  username    String? @unique
+  password    String? @unique
+  email   String @unique
+  profile Profile?
+  transaksi Transaksi[]
+  promo Promo[]
+}
+
+model Profile {
+  id     Int  @id @default(autoincrement())
+  name    String? @unique
+  tanggal_lahir DateTime @db.Date
+  picture String
+  address String? @db.Text
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique // relation scalar field (used in the `@relation` attribute above)
+}
+
+model Produk {
+  id     Int  @id @default(autoincrement())
+  name    String? @unique
+  price Int
+  brand String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt 
+  jenis   Jenis_Produk @relation(fields: [jenis_produk_id], references: [id])
+  jenis_produk_id Int  @unique // relation scalar field (used in the `@relation` attribute above)
+  transaksi Transaksi[]
+}
+
+model Jenis_Produk{
+    id     Int  @id @default(autoincrement())
+    nama String? @unique
+    produks Produk?
+}
+
+model Transaksi {
+    id     Int  @id @default(autoincrement())
+    is_paid  Boolean @default(false)
+    gross_amount Int
+    discount_amount Int
+    total_amount Int
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt 
+    product  Produk @relation(fields: [product_id], references: [id])
+    product_id Int  @unique 
+    promo   Promo @relation(fields: [promo_id], references: [id])
+    promo_id Int  @unique 
+    user   User @relation(fields: [userId], references: [id])
+    userId Int  @unique
+}
+
+model Promo {
+  id Int  @id @default(autoincrement())
+  name String?
+  code String
+  discount Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt 
+  transaksi Transaksi[]
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
